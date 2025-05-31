@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Galeria de Áudios</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .audio-item { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Publique seu Áudio</h1>
+  <form id="uploadForm">
+    <input type="text" id="author" placeholder="Seu nome" required><br><br>
+    <input type="file" id="audioFile" accept="audio/*" required><br><br>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <h2>Galeria de Áudios</h2>
+  <div id="audioList"></div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const audioList = document.getElementById('audioList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('author', document.getElementById('author').value);
+      formData.append('audio', document.getElementById('audioFile').files[0]);
+
+      await fetch('/api/upload', { method: 'POST', body: formData });
+      loadAudios();
+    });
+
+    async function loadAudios() {
+      const res = await fetch('/api/audios');
+      const audios = await res.json();
+      audioList.innerHTML = '';
+
+      audios.forEach(audio => {
+        const div = document.createElement('div');
+        div.className = 'audio-item';
+        div.innerHTML = `<strong>${audio.author}</strong><br>
+                         <audio controls src="${audio.url}"></audio>`;
+        audioList.appendChild(div);
+      });
+    }
+
+    loadAudios();
+  </script>
+</body>
+</html>
